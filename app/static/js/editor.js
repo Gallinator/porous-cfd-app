@@ -183,7 +183,7 @@ acceptIcon.addEventListener("click", async () => {
   else {
     sessionStorage.setItem("data", JSON.stringify(data))
 
-    window.open("inference/index.html", "_self")
+    window.frameElement.src = "inference.html"
 
     loadingDialog.open = false
     curveEditor.enabled = true
