@@ -13,9 +13,9 @@ from starlette.staticfiles import StaticFiles
 from torch.utils.data import DataLoader
 
 from app.config import AppSettings
-from dataset.foam_data import FoamData
-from dataset.foam_dataset import FoamDataset, collate_fn
-from models.pipn.pipn_foam import PipnFoam, PipnFoamPp, PipnFoamPpMrg
+from porous_cfd.dataset.foam_data import FoamData
+from porous_cfd.dataset.foam_dataset import FoamDataset, collate_fn
+from porous_cfd.models.pipn.pipn_foam import PipnFoam, PipnFoamPp, PipnFoamPpMrg
 from app.api_models import Predict2dInput, Response2d
 
 
@@ -43,7 +43,7 @@ def inverse_transform_output(dataset: FoamDataset, data: FoamData, *fields) -> l
 def generate_f(input_data: Predict2dInput, session_root: str):
     # Only import blender in a subprocess, as the path is passed from the main process (see https://projects.blender.org/blender/blender/issues/98534)
     # This has to be done here otherwise the context is incorrect
-    from examples.duct_fixed_boundary.generator_2d_fixed import Generator2DFixed
+    from porous_cfd.examples.duct_fixed_boundary.generator_2d_fixed import Generator2DFixed
     from app.preprocessing import path_to_obj, create_session_folders
 
     create_session_folders("assets", session_root)
@@ -88,7 +88,8 @@ async def predict(input_data: Predict2dInput):
         # Override the generated min_points.json
         shutil.copy("assets/min_points.json", f"{session_dir}/data")
 
-        dataset = FoamDataset(f"{session_dir}/data/split", 1000, 200, 500, np.random.default_rng(8421), meta_dir="assets")
+        dataset = FoamDataset(f"{session_dir}/data/split", 1000, 200, 500, np.random.default_rng(8421),
+                              meta_dir="assets")
 
         torch.manual_seed(8421)
         data_loader = DataLoader(dataset,
