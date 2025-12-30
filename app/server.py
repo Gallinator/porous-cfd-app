@@ -85,6 +85,8 @@ async def predict(input_data: Predict2dInput):
         predict_process = Process(target=generate_f, args=(input_data, session_dir))
         predict_process.start()
         predict_process.join()
+        if predict_process.exitcode != 0:
+            raise RuntimeError("Error generating mesh!")
 
         # Override the generated min_points.json
         shutil.copy("assets/min_points.json", f"{session_dir}/data")
