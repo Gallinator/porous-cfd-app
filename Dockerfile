@@ -19,11 +19,14 @@ RUN apt-get install libwayland-dev wayland-protocols libxkbcommon-dev libdbus-1-
 # Python dependencies
 RUN pip install --no-cache-dir torch_geometric
 RUN pip install --no-cache-dir pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.7.0+cu128.html
+RUN pip install --no-cache-dir -r porous_cfd/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 USER appuser
 WORKDIR ./app
 
+ENV PYTHONPATH=".:../porous_cfd"
 ENV OPENFOAM_DIR="/usr/lib/openfoam/openfoam2412"
 ENV N_PROCS=2
+
 CMD [ "fastapi", "run", "server.py"]
