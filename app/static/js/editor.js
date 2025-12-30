@@ -169,7 +169,7 @@ acceptIcon.addEventListener("click", async () => {
     })
 
   let data = await response.json()
-  console.log(response.status)
+
   if (response.status >= 300) {
     loadingDialog.open = false
 
