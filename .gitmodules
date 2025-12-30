@@ -1,0 +1,3 @@
+[submodule "porous_cfd"]
+	path = porous_cfd
+	url = https://github.com/Gallinator/porous-cfd.git
