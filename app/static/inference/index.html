@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" class="mdui-theme-auto">
+
+<head>
+    <title>Porous CFD</title>
+    <script id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/mdui@2/mdui.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://unpkg.com/mdui@2/mdui.global.js"></script>
+    <script src="https://cdn.plot.ly/plotly-3.3.0.js" charset="utf-8"></script>
+    <script src="../js/bspline.js"></script>
+    <script src="../js/visualization.js"></script>
+</head>
+
+<body>
+    <mdui-layout full-height>
+        <mdui-navigation-rail value="predicted">
+            <mdui-button-icon id="backIcon" icon="arrow_back--rounded" slot="top"></mdui-button-icon>
+            <mdui-navigation-rail-item id="predictedIcon" icon="air--rounded"
+                value="predicted">Predicted</mdui-navigation-rail-item>
+            <mdui-navigation-rail-item id="trueIcon" icon="check--rounded"
+                value="ground">True</mdui-navigation-rail-item>
+            <mdui-navigation-rail-item id="errorIcon" icon="error--rounded"
+                value="error">MAE</mdui-navigation-rail-item>
+            <mdui-navigation-rail-item id="residualsIcon" icon="functions--rounded"
+                value="residuals">Residuals</mdui-navigation-rail-item>
+        </mdui-navigation-rail>
+
+        <mdui-layout-main>
+            <div class="inference-plots-container">
+                <div id="tlPlot" class="inference-plot"></div>
+                <div id="trPlot" class="inference-plot"></div>
+                <div id="blPlot" class="inference-plot"></div>
+                <div id="brPlot" class="inference-plot"></div>
+            </div>
+        </mdui-layout-main>
+
+    </mdui-layout>
+    <script src="../js/inference.js"></script>
+</body>
+
+</html>
