@@ -128,11 +128,13 @@ class CurveEditor {
         this.handler = { onupdate: () => { } }
 
         this.div.ownerDocument.addEventListener("keydown", (event) => {
-            if (event.ctrlKey)
+            console.log(event)
+            if (event.key == "Control")
                 this.isDeleteKeyDown = true
         })
         this.div.ownerDocument.addEventListener("keyup", (event) => {
-            if (event.ctrlKey)
+            console.log(event)
+            if (event.key == "Control")
                 this.isDeleteKeyDown = false
         })
 
