@@ -8,6 +8,7 @@ import numpy as np
 import torch
 from fastapi import FastAPI, HTTPException
 from lightning import Trainer
+from lightning.pytorch.callbacks import RichProgressBar
 from scipy.interpolate import griddata
 from starlette.staticfiles import StaticFiles
 from torch.utils.data import DataLoader
@@ -102,7 +103,8 @@ async def predict(input_data: Predict2dInput):
 
         trainer = Trainer(logger=False,
                           enable_checkpointing=False,
-                          inference_mode=False)
+                          inference_mode=False,
+                          callbacks=[RichProgressBar()])
 
         is_lock_acquired = await app.model_lock.acquire()
         model = app.models[input_data.model]
