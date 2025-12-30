@@ -127,6 +127,8 @@ class CurveEditor {
 
         this.handler = { onupdate: () => { } }
 
+        window.focus()
+
         this.div.ownerDocument.addEventListener("keydown", (event) => {
             console.log(event)
             if (event.key == "Control")
