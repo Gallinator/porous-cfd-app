@@ -20,6 +20,12 @@ const loadingDialog = document.getElementById("loadingDialog")
 const errorDialog = document.getElementById("errorDialog")
 const errorDialogAcceptButton = document.getElementById("errorDialogAcceptButton")
 
+const darcySlider = document.getElementById("darcySlider")
+const velocitySlider = document.getElementById("velocitySlider")
+const angleSlider = document.getElementById("angleSlider")
+const defaultSliderValues = { "d": darcySlider.value, "velocity": velocitySlider.value, "angle": angleSlider.value }
+
+
 let style = getComputedStyle(document.documentElement)
 let backgroundColor = mdColorToPlotly(style.getPropertyValue("--mdui-color-background"))
 let primaryColor = mdColorToPlotly(style.getPropertyValue("--mdui-color-primary"))
@@ -146,6 +152,19 @@ splineDegreeSlider.addEventListener("change", () => {
   curve = new BSpline(newDegree, cPoints, curve.closed)
   curveEditor.curve = curve
   curveEditor.onupdate()
+})
+
+modelSelector.addEventListener("change", (event) => {
+  let isPipnSelected = event.target.value.includes("pipn")
+  darcySlider.disabled = isPipnSelected
+  angleSlider.disabled = isPipnSelected
+  velocitySlider.disabled = isPipnSelected
+
+  if (isPipnSelected) {
+    darcySlider.value = defaultSliderValues.d
+    angleSlider.value = defaultSliderValues.angle
+    velocitySlider.value = defaultSliderValues.velocity
+  }
 })
 
 acceptIcon.addEventListener("click", async () => {
