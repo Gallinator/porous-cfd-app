@@ -29,12 +29,14 @@
                 <div class="mdui-prose">
                     <label>Model</label>
                 </div>
-                <mdui-segmented-button-group id="modelSelector" full-width selects="single" value="pipn"
-                    style="margin-top: 5%;">
-                    <mdui-segmented-button value="pipn">PIPN</mdui-segmented-button>
-                    <mdui-segmented-button value="pipn_pp">PIPN++</mdui-segmented-button>
-                    <mdui-segmented-button value="pipn_pp_mrg">PIPN++ MRG</mdui-segmented-button>
-                </mdui-segmented-button-group>
+                <mdui-radio-group id="modelSelector" value="pipn">
+                    <mdui-radio value="pipn">PIPN</mdui-radio>
+                    <mdui-radio value="pipn_pp">PIPN++</mdui-radio>
+                    <mdui-radio value="pipn_pp_mrg">PIPN++ MRG</mdui-radio>
+                    <mdui-radio value="pi_gano">PI-GANO</mdui-radio>
+                    <mdui-radio value="pi_gano_pp">PI-GANO++</mdui-radio>
+                </mdui-radio-group>
+
 
                 <div class="mdui-prose" style="margin-top: 5%;">
                     <label>Spline degree</label>
