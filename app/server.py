@@ -49,7 +49,7 @@ def generate_f(input_data: Predict2dInput, session_root: str):
     from porous_cfd.examples.duct_variable_boundary.generator_2d_variable import Generator2DVariable
     from app.preprocessing import path_to_obj, create_session_folders
 
-    create_session_folders("assets", session_root)
+    create_session_folders("assets", session_root, input_data)
 
     path_to_obj(input_data.points["x"], input_data.points["y"], f"{session_root}/assets/meshes/split")
 

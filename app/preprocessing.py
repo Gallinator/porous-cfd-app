@@ -4,7 +4,7 @@ import bpy
 import numpy as np
 
 
-def create_session_folders(assets_dir: str, session_dir: str):
+def create_session_folders(assets_dir: str, session_dir: str, predict_input: Predict2dInput):
     assets_dir = Path(assets_dir)
     session_dir = Path(session_dir)
     session_dir.mkdir(parents=True, exist_ok=True)
