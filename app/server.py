@@ -59,6 +59,11 @@ def generate_f(input_data: Predict2dInput, session_root: str):
 
     datagen.generate(f"{session_root}/data")
 
+    # Override meta and min_points from training set
+    model_dir = "pipn" if "pipn" in input_data.model else "pi-gano"
+    shutil.copy(f"assets/{model_dir}/min_points.json", f"{session_root}/data")
+    shutil.copy(f"assets/{model_dir}/meta.json", f"{session_root}/data/split")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -94,11 +99,8 @@ async def predict(input_data: Predict2dInput):
         if predict_process.exitcode != 0:
             raise RuntimeError("Error generating mesh!")
 
-        # Override the generated min_points.json
-        shutil.copy("assets/min_points.json", f"{session_dir}/data")
-
-        dataset = FoamDataset(f"{session_dir}/data/split", 1000, 200, 500, np.random.default_rng(8421),
-                              meta_dir="assets")
+        dataset = FoamDataset(f"{session_dir}/data/split", 1000, 200, 500,
+                              np.random.default_rng(8421))
 
         torch.manual_seed(8421)
         data_loader = DataLoader(dataset,
