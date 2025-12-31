@@ -1,7 +1,48 @@
+import json
+import math
 import shutil
 from pathlib import Path
 import bpy
 import numpy as np
+from sympy import nsolve, solve
+from sympy.abc import x
+
+from app.api_models import Predict2dInput
+
+
+def particle_size_from_re(re: float, u: float, nu: float) -> list:
+    return nsolve(((u * x) / nu - re), x, 0)
+
+
+def eps_from_d(dp: float, k: float) -> list:
+    return solve((dp ** 2 * x ** 3) / (180 * (1 - x) ** 2) - k, x)
+
+
+def f_from_eps(eps: float) -> float:
+    return 1.8 / math.sqrt(180 * eps ** 5) * eps
+
+
+def get_f_from_d(d: float, u: float, re: float) -> float:
+    nu = 1489.4e-6
+    k = 1 / d
+    dp = particle_size_from_re(re, u, nu)
+    eps = eps_from_d(dp, k)[0].n(chop=True)
+    return float(f_from_eps(eps) / math.sqrt(k))
+
+
+def copy_config_with_boundary_conditions(config_path: Path, data_path: Path, input_data: Predict2dInput):
+    with open(config_path, 'r') as file:
+        config = json.load(file)
+    config["cfd params"]["coeffs"][0]["d"] = [input_data.d, input_data.d, 0]
+    config["cfd params"]["inlet"] = [input_data.inlet_u]
+    config["cfd params"]["angle"] = [input_data.inlet_angle, input_data.inlet_angle, 0]
+
+    re = 0.8 if "pipn" in input_data.model else 13.428
+    f = get_f_from_d(input_data.d, 0.2, re)
+    config["cfd params"]["coeffs"][0]["f"] = [f, f, 0]
+
+    with open(data_path / "config.json", 'w') as f:
+        f.write(json.dumps(config))
 
 
 def create_session_folders(assets_dir: str, session_dir: str, predict_input: Predict2dInput):
