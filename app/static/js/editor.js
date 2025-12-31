@@ -88,7 +88,10 @@ var layout = {
   }
 }
 
-let config = { staticPlot: true }
+let config = {
+  staticPlot: true,
+  responsive: true
+}
 
 Plotly.newPlot(myDiv, [curveTrace, controlTrace], layout, config)
 
