@@ -155,7 +155,10 @@ acceptIcon.addEventListener("click", async () => {
   let body = {
     "uuid": uuid,
     model: modelSelector.value.toLowerCase(),
-    points: curve.getPlotlyCurve(nPoints)
+    points: curve.getPlotlyCurve(nPoints),
+    d: darcySlider.value,
+    inlet_angle: angleSlider.value,
+    inlet_u: velocitySlider.value
   }
 
   let response = await fetch("predict",
