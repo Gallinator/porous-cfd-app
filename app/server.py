@@ -16,6 +16,8 @@ from torch.utils.data import DataLoader
 from app.config import AppSettings
 from porous_cfd.dataset.foam_data import FoamData
 from porous_cfd.dataset.foam_dataset import FoamDataset, collate_fn
+from porous_cfd.models.pi_gano.pi_gano import PiGano
+from porous_cfd.models.pi_gano.pi_gano_pp import PiGanoPp
 from porous_cfd.models.pipn.pipn_foam import PipnFoam, PipnFoamPp, PipnFoamPpMrg
 from app.api_models import Predict2dInput, Response2d
 
@@ -61,12 +63,16 @@ def generate_f(input_data: Predict2dInput, session_root: str):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.models = {}
-    app.models['pipn'] = PipnFoam.load_from_checkpoint("assets/weights/pipn.ckpt")
+    app.models['pipn'] = PipnFoam.load_from_checkpoint("assets/pipn/pipn.ckpt")
     app.models['pipn'].verbose_predict = True
-    app.models['pipn_pp'] = PipnFoamPp.load_from_checkpoint("assets/weights/pipn-pp.ckpt")
+    app.models['pipn_pp'] = PipnFoamPp.load_from_checkpoint("assets/pipn/pipn-pp.ckpt")
     app.models['pipn_pp'].verbose_predict = True
-    app.models['pipn_pp_mrg'] = PipnFoamPpMrg.load_from_checkpoint("assets/weights/pipn-pp-mrg.ckpt")
+    app.models['pipn_pp_mrg'] = PipnFoamPpMrg.load_from_checkpoint("assets/pipn/pipn-pp-mrg.ckpt")
     app.models['pipn_pp_mrg'].verbose_predict = True
+    app.models['pi_gano'] = PiGano.load_from_checkpoint("assets/pi-gano/pi_gano.ckpt")
+    app.models['pi_gano'].verbose_predict = True
+    app.models['pi_gano_pp'] = PiGanoPp.load_from_checkpoint("assets/pi-gano/pi_gano_pp.ckpt")
+    app.models['pi_gano_pp'].verbose_predict = True
     yield
 
 
