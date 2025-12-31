@@ -46,14 +46,14 @@ def inverse_transform_output(dataset: FoamDataset, data: FoamData, *fields) -> l
 def generate_f(input_data: Predict2dInput, session_root: str):
     # Only import blender in a subprocess, as the path is passed from the main process (see https://projects.blender.org/blender/blender/issues/98534)
     # This has to be done here otherwise the context is incorrect
-    from porous_cfd.examples.duct_fixed_boundary.generator_2d_fixed import Generator2DFixed
+    from porous_cfd.examples.duct_variable_boundary.generator_2d_variable import Generator2DVariable
     from app.preprocessing import path_to_obj, create_session_folders
 
     create_session_folders("assets", session_root)
 
     path_to_obj(input_data.points["x"], input_data.points["y"], f"{session_root}/assets/meshes/split")
 
-    datagen = Generator2DFixed(f"{session_root}/assets", openfoam_cmd, settings.n_procs, 0, False)
+    datagen = Generator2DVariable(f"{session_root}/assets", openfoam_cmd, settings.n_procs, 0, False)
     datagen.write_momentum = False
     datagen.save_plots = False
 
