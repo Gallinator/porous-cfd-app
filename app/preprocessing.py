@@ -51,13 +51,20 @@ def create_session_folders(assets_dir: str, session_dir: str, predict_input: Pre
     session_dir.mkdir(parents=True, exist_ok=True)
 
     shutil.copytree(assets_dir / "openfoam-case-template", session_dir / "assets" / "openfoam-case-template")
-    shutil.copy(assets_dir / "data_config.json", session_dir / "assets")
+
     split_dir = session_dir / "assets" / "meshes" / "split"
     split_dir.mkdir(exist_ok=True, parents=True)
     shutil.copy(assets_dir / "transforms.json", split_dir)
 
     data_dir = session_dir / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
+
+    model_dir = "pipn" if "pipn" in predict_input.model else "pi-gano"
+    shutil.copy(assets_dir / model_dir / "data_config.json", session_dir / "assets")
+
+    copy_config_with_boundary_conditions(assets_dir / "config.json",
+                                         session_dir / "assets" / "meshes" / "split",
+                                         predict_input)
 
 
 def path_to_obj(x: list[float], y: list[float], dest_path: str):
