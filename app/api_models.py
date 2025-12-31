@@ -5,6 +5,9 @@ class Predict2dInput(BaseModel):
     uuid: str
     model: str
     points: dict[str, list[float]]
+    d: float
+    inlet_u: float
+    inlet_angle: float
 
 
 class Response2d(BaseModel):
