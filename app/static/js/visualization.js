@@ -140,7 +140,7 @@ class CurveEditor {
                 this.isDeleteKeyDown = false
         })
 
-        this.div.ownerDocument.addEventListener("mousedown", (evt) => {
+        this.div.ownerDocument.addEventListener("pointerdown", (evt) => {
             if (!isInsidePlot(this.div, evt) || !this.enabled) return
             let clickedPoint = getPlotPos(div, evt);
 
@@ -152,7 +152,7 @@ class CurveEditor {
             })
         });
 
-        this.div.ownerDocument.addEventListener("mousemove", (evt) => {
+        this.div.ownerDocument.addEventListener("pointermove", (evt) => {
             let found = false;
             let mousePoint = getPlotPos(this.div, evt)
 
@@ -171,7 +171,7 @@ class CurveEditor {
             this.onupdate();
         });
 
-        this.div.ownerDocument.addEventListener("mouseup", (evt) => {
+        this.div.ownerDocument.addEventListener("pointerup", (evt) => {
             if (!this.moving) return;
             this.moving = false;
         });
