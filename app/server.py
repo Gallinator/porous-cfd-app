@@ -4,7 +4,7 @@ import shutil
 import traceback
 from concurrent.futures import ProcessPoolExecutor
 from contextlib import asynccontextmanager
-from multiprocessing import Process
+from functools import partial
 import numpy as np
 import torch
 from fastapi import FastAPI, HTTPException
@@ -44,7 +44,7 @@ def inverse_transform_output(dataset: FoamDataset, data: FoamData, *fields) -> l
     return [dataset.normalizers[f].inverse_transform(data[f].numpy(force=True)) for f in fields]
 
 
-def generate_f(input_data: Predict2dInput, session_root: str):
+def generate_data(input_data: Predict2dInput, session_root: str):
     # Only import blender in a subprocess, as the path is passed from the main process (see https://projects.blender.org/blender/blender/issues/98534)
     # This has to be done here otherwise the context is incorrect
     from porous_cfd.examples.duct_variable_boundary.generator_2d_variable import Generator2DVariable
@@ -160,12 +160,9 @@ async def predict(input_data: Predict2dInput):
     session_dir = f"sessions/{input_data.uuid}"
     is_lock_acquired = False
     try:
-        # Generate mesh using a new process due to blender import issues
-        predict_process = Process(target=generate_f, args=(input_data, session_dir))
-        predict_process.start()
-        predict_process.join()
-        if predict_process.exitcode != 0:
-            raise RuntimeError("Error generating mesh!")
+        event_loop = asyncio.get_running_loop()
+        partial_f = partial(generate_data, input_data, session_dir)
+        await event_loop.run_in_executor(app.process_pool, partial_f)
 
         dataset = FoamDataset(f"{session_dir}/data/split", 1000, 200, 500,
                               np.random.default_rng(8421))
@@ -192,69 +189,8 @@ async def predict(input_data: Predict2dInput):
 
         shutil.rmtree(session_dir)
 
-        c, tgt_u, tgt_p = inverse_transform_output(dataset, dataset[0], "C", "U", "p")
-        points = {"x": c[..., 0],
-                  "y": c[..., 1]}
-
-        target = {"Ux": tgt_u[..., 0],
-                  "Uy": tgt_u[..., 1],
-                  "U": np.linalg.norm(tgt_u, axis=1),
-                  "p": tgt_p}
-
-        pred_u, pred_p = inverse_transform_output(dataset, predicted, "U", "p")
-
-        pred = {"Ux": pred_u[0, ..., 0],
-                "Uy": pred_u[0, ..., 1],
-                "U": np.linalg.norm(pred_u[0], axis=1),
-                "p": pred_p[0]}
-
-        error_u, error_p = np.abs(pred_u - tgt_u), np.abs(pred_p - tgt_p)
-        error = {"Ux": error_u[0, ..., 0],
-                 "Uy": error_u[0, ..., 1],
-                 "U": np.linalg.norm(error_u[0], axis=1),
-                 "p": error_p[0]}
-
-        residuals = {"Momentumx": residuals["Momentumx"].numpy(force=True)[0],
-                     "Momentumy": residuals["Momentumy"].numpy(force=True)[0],
-                     "Momentum": np.linalg.norm(residuals["Momentum"].numpy(force=True)[0], axis=1),
-                     "div": residuals["div"].numpy(force=True)[0]}
-
-        porous_ids = dataset[0]["cellToRegion"].flatten()
-
-        grid = get_interpolation_grid(c, 50)
-        grid_points = {"x": grid[0].flatten(), "y": grid[1].flatten()}
-
-        grid_pred = interpolate_on_grid(grid, c, pred["Ux"], pred["Uy"], pred["U"], pred["p"])
-        grid_pred = dict(zip(pred.keys(), grid_pred))
-
-        grid_target = interpolate_on_grid(grid, c, target["Ux"], target["Uy"], target["U"], target["p"])
-        grid_target = dict(zip(target.keys(), grid_target))
-
-        grid_error = interpolate_on_grid(grid, c, error["Ux"], error["Uy"], error["U"], error["p"])
-        grid_error = dict(zip(pred.keys(), grid_error))
-
-        internal_c = dataset.normalizers["C"].inverse_transform(dataset[0]["internal"]["C"].numpy(force=True))
-
-        grid_residuals = interpolate_on_grid(grid, internal_c, residuals["Momentumx"],
-                                             residuals["Momentumy"],
-                                             residuals["Momentum"],
-                                             residuals["div"])
-        grid_residuals = dict(zip(residuals.keys(), grid_residuals))
-
-        raw_data = Response2d(points=ndarrays_to_list(points),
-                              target=ndarrays_to_list(target),
-                              porous_ids=porous_ids.tolist(),
-                              predicted=ndarrays_to_list(pred),
-                              error=ndarrays_to_list(error),
-                              residuals=ndarrays_to_list(residuals))
-
-        grid_data = Response2d(points=ndarrays_to_list(grid_points),
-                               target=ndarrays_to_list(grid_target),
-                               predicted=ndarrays_to_list(grid_pred),
-                               error=ndarrays_to_list(grid_error),
-                               residuals=ndarrays_to_list(grid_residuals))
-
-        return {"raw_data": raw_data, "grid_data": grid_data}
+        partial_f = partial(postprocess, dataset, predicted, residuals)
+        return await event_loop.run_in_executor(app.process_pool, partial_f)
     except:
         traceback.print_exc()
 
