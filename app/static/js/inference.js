@@ -54,23 +54,22 @@ function getEqualAspectSize(plotDiv, aspect) {
     return plotPixSize
 }
 
-function createPlot(title, plotDiv, rawPoints, rawData, gridPoints, gridField, unitText) {
+function createPlot(title, plotDiv, rawData, gridData, subset, field, unitText) {
     let scatterTrace = {
-        x: rawPoints.x,
-        y: rawPoints.y,
+        x: rawData.points.x,
+        y: rawData.points.y,
         mode: 'markers',
         type: 'scatter',
         marker: { color: "black" },
-        colorscale: "balance",
         name: "",
-        customdata: rawData,
+        customdata: rawData[subset][field],
         hovertemplate: "%{customdata:.3f}" + " " + unitText
     }
 
     let contourTrace = {
-        x: gridPoints.x,
-        y: gridPoints.y,
-        z: gridField,
+        x: gridData.points.x,
+        y: gridData.points.y,
+        z: gridData[subset][field],
         type: 'contour',
         colorscale: "Portland",
         contours: { coloring: 'heatmap' },
@@ -127,10 +126,10 @@ function updatePlot(plotDiv, rawData, gridData, unitText, title) {
     plotDiv._fullData[0].customdata = rawData
 }
 
-createPlot("$U_x$", tlPlot, rawData.points, rawData.predicted.Ux, gridData.points, gridData.predicted.Ux, "m \\ s")
-createPlot("$U_y$", trPlot, rawData.points, rawData.predicted.Uy, gridData.points, gridData.predicted.Uy, "m \\ s")
-createPlot("$p$", blPlot, rawData.points, rawData.predicted.p, gridData.points, gridData.predicted.p, "m² \\ s²")
-createPlot("$U_x$", brPlot, rawData.points, rawData.predicted.U, gridData.points, gridData.predicted.U, "m \\ s")
+createPlot("$U_x$", tlPlot, rawData, gridData, "predicted", "Ux", "m \\ s")
+createPlot("$U_y$", trPlot, rawData, gridData, "predicted", "Uy", "m \\ s")
+createPlot("$p$", blPlot, rawData, gridData, "predicted", "p", "m² \\ s²")
+createPlot("$U_x$", brPlot, rawData, gridData, "predicted", "U", "m \\ s")
 
 predictedIcon.addEventListener("focus", () => {
     updatePlot(tlPlot, rawData.predicted.Ux, gridData.predicted.Ux, "m \\ s", "$U_x$")
