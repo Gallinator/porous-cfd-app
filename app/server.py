@@ -2,6 +2,7 @@ import asyncio
 import os.path
 import shutil
 import traceback
+from concurrent.futures import ProcessPoolExecutor
 from contextlib import asynccontextmanager
 from multiprocessing import Process
 import numpy as np
@@ -144,12 +145,13 @@ async def lifespan(app: FastAPI):
     app.models['pi_gano_pp'] = PiGanoPp.load_from_checkpoint("assets/pi-gano/pi_gano_pp.ckpt")
     app.models['pi_gano_pp'].verbose_predict = True
     yield
+    app.process_pool.shutdown()
 
 
 settings = AppSettings()
 app = FastAPI(lifespan=lifespan)
 openfoam_cmd = f'{settings.openfoam_dir}/etc/openfoam'
-app.model_lock = asyncio.Lock()
+app.process_pool = ProcessPoolExecutor()
 app.models = {}
 
 
