@@ -65,6 +65,72 @@ def generate_f(input_data: Predict2dInput, session_root: str):
     shutil.copy(f"assets/{model_dir}/meta.json", f"{session_root}/data/split")
 
 
+def postprocess(dataset: FoamDataset, predicted: FoamData, residuals: FoamData):
+    c, tgt_u, tgt_p = inverse_transform_output(dataset, dataset[0], "C", "U", "p")
+    points = {"x": c[..., 0],
+              "y": c[..., 1]}
+
+    target = {"Ux": tgt_u[..., 0],
+              "Uy": tgt_u[..., 1],
+              "U": np.linalg.norm(tgt_u, axis=1),
+              "p": tgt_p}
+
+    pred_u, pred_p = inverse_transform_output(dataset, predicted, "U", "p")
+
+    pred = {"Ux": pred_u[0, ..., 0],
+            "Uy": pred_u[0, ..., 1],
+            "U": np.linalg.norm(pred_u[0], axis=1),
+            "p": pred_p[0]}
+
+    error_u, error_p = np.abs(pred_u - tgt_u), np.abs(pred_p - tgt_p)
+    error = {"Ux": error_u[0, ..., 0],
+             "Uy": error_u[0, ..., 1],
+             "U": np.linalg.norm(error_u[0], axis=1),
+             "p": error_p[0]}
+
+    residuals = {"Momentumx": residuals["Momentumx"].numpy(force=True)[0],
+                 "Momentumy": residuals["Momentumy"].numpy(force=True)[0],
+                 "Momentum": np.linalg.norm(residuals["Momentum"].numpy(force=True)[0], axis=1),
+                 "div": residuals["div"].numpy(force=True)[0]}
+
+    porous_ids = dataset[0]["cellToRegion"].flatten()
+
+    grid = get_interpolation_grid(c, 50)
+    grid_points = {"x": grid[0].flatten(), "y": grid[1].flatten()}
+
+    grid_pred = interpolate_on_grid(grid, c, pred["Ux"], pred["Uy"], pred["U"], pred["p"])
+    grid_pred = dict(zip(pred.keys(), grid_pred))
+
+    grid_target = interpolate_on_grid(grid, c, target["Ux"], target["Uy"], target["U"], target["p"])
+    grid_target = dict(zip(target.keys(), grid_target))
+
+    grid_error = interpolate_on_grid(grid, c, error["Ux"], error["Uy"], error["U"], error["p"])
+    grid_error = dict(zip(pred.keys(), grid_error))
+
+    internal_c = dataset.normalizers["C"].inverse_transform(dataset[0]["internal"]["C"].numpy(force=True))
+
+    grid_residuals = interpolate_on_grid(grid, internal_c, residuals["Momentumx"],
+                                         residuals["Momentumy"],
+                                         residuals["Momentum"],
+                                         residuals["div"])
+    grid_residuals = dict(zip(residuals.keys(), grid_residuals))
+
+    raw_data = Response2d(points=ndarrays_to_list(points),
+                          target=ndarrays_to_list(target),
+                          porous_ids=porous_ids.tolist(),
+                          predicted=ndarrays_to_list(pred),
+                          error=ndarrays_to_list(error),
+                          residuals=ndarrays_to_list(residuals))
+
+    grid_data = Response2d(points=ndarrays_to_list(grid_points),
+                           target=ndarrays_to_list(grid_target),
+                           predicted=ndarrays_to_list(grid_pred),
+                           error=ndarrays_to_list(grid_error),
+                           residuals=ndarrays_to_list(grid_residuals))
+
+    return {"raw_data": raw_data, "grid_data": grid_data}
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.models = {}
