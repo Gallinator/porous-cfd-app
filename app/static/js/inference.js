@@ -54,6 +54,15 @@ function getEqualAspectSize(plotDiv, aspect) {
     return plotPixSize
 }
 
+function addPorousScatterPoints(rawData) {
+    rawData.porous_points = { x: [], y: [] }
+    for (let i = 0; i < rawData.porous_ids.length; i++)
+        if (rawData.porous_ids[i] > 0) {
+            rawData.porous_points.x.push(rawData.points.x[i])
+            rawData.porous_points.y.push(rawData.points.y[i])
+        }
+}
+
 function createPlot(title, plotDiv, rawData, gridData, subset, field, unitText) {
     let scatterTrace = {
         x: rawData.points.x,
@@ -64,6 +73,21 @@ function createPlot(title, plotDiv, rawData, gridData, subset, field, unitText) 
         name: "",
         customdata: rawData[subset][field],
         hovertemplate: "%{customdata:.3f}" + " " + unitText
+    }
+
+
+    let idTrace = {
+        x: rawData.porous_points.x,
+        y: rawData.porous_points.y,
+        mode: 'markers',
+        marker: {
+            size: 10,
+            color: "rgba(0,0,0,0)",
+            line: { color: "black", width: 1 }
+        },
+        name: "",
+        hovertemplate: false,
+        hoverinfo: "skip"
     }
 
     let contourTrace = {
@@ -100,7 +124,7 @@ function createPlot(title, plotDiv, rawData, gridData, subset, field, unitText) 
         displaylogo: false
     }
 
-    Plotly.newPlot(plotDiv, [scatterTrace, contourTrace], layout, config)
+    Plotly.newPlot(plotDiv, [scatterTrace, contourTrace, idTrace], layout, config)
 
     // Update the plot to have the correct aspect ratio after automatically calculating the margins
     let equalAspectPlotSize = getEqualAspectSize(plotDiv, 1 / 0.6)
@@ -125,6 +149,8 @@ function updatePlot(plotDiv, rawData, gridData, unitText, title) {
     // This has tp be manually set because using restyle does not work
     plotDiv._fullData[0].customdata = rawData
 }
+
+addPorousScatterPoints(rawData)
 
 createPlot("$U_x$", tlPlot, rawData, gridData, "predicted", "Ux", "m \\ s")
 createPlot("$U_y$", trPlot, rawData, gridData, "predicted", "Uy", "m \\ s")
