@@ -158,7 +158,6 @@ app.models = {}
 @app.post("/predict", summary="Predict flow from porous object", response_model=dict[str, Response2d])
 async def predict(input_data: Predict2dInput):
     session_dir = f"sessions/{input_data.uuid}"
-    is_lock_acquired = False
     try:
         event_loop = asyncio.get_running_loop()
         partial_f = partial(generate_data, input_data, session_dir)
@@ -181,11 +180,9 @@ async def predict(input_data: Predict2dInput):
                           inference_mode=False,
                           callbacks=[RichProgressBar()])
 
-        is_lock_acquired = await app.model_lock.acquire()
+        # No lock as async coroutines run on the main thread
         model = app.models[input_data.model]
         predicted, residuals = trainer.predict(model, dataloaders=data_loader)[0]
-        app.model_lock.release()
-        is_lock_acquired = False
 
         shutil.rmtree(session_dir)
 
@@ -196,9 +193,6 @@ async def predict(input_data: Predict2dInput):
 
         if os.path.exists(session_dir):
             shutil.rmtree(session_dir)
-
-        if is_lock_acquired:
-            app.model_lock.release()
 
         raise HTTPException(status_code=500)
 
