@@ -130,12 +130,10 @@ class CurveEditor {
         window.focus()
 
         this.div.ownerDocument.addEventListener("keydown", (event) => {
-            console.log(event)
             if (event.key == "Control")
                 this.isDeleteKeyDown = true
         })
         this.div.ownerDocument.addEventListener("keyup", (event) => {
-            console.log(event)
             if (event.key == "Control")
                 this.isDeleteKeyDown = false
         })
