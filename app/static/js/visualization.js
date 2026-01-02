@@ -83,7 +83,7 @@ function getLayerPos(div, eventData) {
     let margins = div._fullLayout.margin
     return {
         "x": eventData.clientX - rect.x - margins.l + window.scrollX,
-        "y": eventData.clientY - rect.y - margins.t + window.screenY
+        "y": eventData.clientY - rect.y - margins.t + window.scrollY
     }
 }
 
