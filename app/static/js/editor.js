@@ -95,7 +95,7 @@ let config = {
 
 Plotly.newPlot(myDiv, [curveTrace, controlTrace], layout, config)
 
-let curveEditor = new CurveEditor(myDiv, curve, 0.005)
+let curveEditor = new CurveEditor(myDiv, curve, 0.02)
 
 curveEditor.onupdate = function () {
   let curvePoints = curve.getPlotlyCurve(nPoints)
