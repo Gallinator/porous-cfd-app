@@ -124,6 +124,7 @@ class CurveEditor {
         this.moving = false
         this.movingId = false
         this.isDeleteKeyDown = false
+        this.offset = { "x": 0, "y": 0 }
 
         this.handler = { onupdate: () => { } }
 
@@ -146,6 +147,8 @@ class CurveEditor {
                 if (this.isWithinThreshold(clickedPoint, p) && this.isSelectable(i)) {
                     this.moving = true;
                     this.movingId = i;
+                    this.offset.x = clickedPoint.x - p.x
+                    this.offset.y = clickedPoint.y - p.y
                 }
             })
         });
@@ -164,7 +167,7 @@ class CurveEditor {
             if (!this.moving)
                 return
 
-            this.curve.moveControlPoint(this.movingId, mousePoint.x, mousePoint.y)
+            this.curve.moveControlPoint(this.movingId, mousePoint.x - this.offset.x, mousePoint.y - this.offset.y)
 
             this.onupdate();
         });
