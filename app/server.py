@@ -133,7 +133,6 @@ def postprocess(dataset: FoamDataset, predicted: FoamData, residuals: FoamData):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.models = {}
     app.models['pipn'] = PipnFoam.load_from_checkpoint("assets/pipn/pipn.ckpt")
     app.models['pipn'].verbose_predict = True
     app.models['pipn_pp'] = PipnFoamPp.load_from_checkpoint("assets/pipn/pipn-pp.ckpt")
@@ -151,6 +150,7 @@ settings = AppSettings()
 app = FastAPI(lifespan=lifespan)
 openfoam_cmd = f'{settings.openfoam_dir}/etc/openfoam'
 app.model_lock = asyncio.Lock()
+app.models = {}
 
 
 @app.post("/predict", summary="Predict flow from porous object", response_model=dict[str, Response2d])
