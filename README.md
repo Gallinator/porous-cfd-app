@@ -23,7 +23,7 @@ Features:
 - Ground truth OpenFOAM simulations
 - Parallel server requests processing with FastAPI
 
-The app is hosted on [HuggingFace Spaces](https://huggingface.co/spaces/Gallinator/porous-cfd).
+The app is hosted on [Hugging Face Spaces](https://huggingface.co/spaces/Gallinator/porous-cfd).
 
 
 ![Editor](docs/Editor_screen.png)
