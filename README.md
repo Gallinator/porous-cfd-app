@@ -12,7 +12,8 @@ app_file: app/server.py
 ---
 
 # Porous CFD web app
-A small web app to experiment with the 2D models proposed in the paper *Modeling diffusion in complex media through Physically Informed Neural Networks*.<br>
+A small web app to experiment with the 2D models proposed in the paper  ["Geometry-Aware Physics-Informed PointNets for Modeling Flows Across Porous Structures
+"](https://arxiv.org/abs/2602.14108).<br>
 Features:
 - Physics Informed PointNet and Physics Informed Geometry Aware Neural Networks available
 - PointNet++ variants included
