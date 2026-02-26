@@ -94,8 +94,7 @@ def postprocess(dataset: FoamDataset, predicted: FoamData, residuals: FoamData):
                  "Momentum": np.linalg.norm(residuals["Momentum"].numpy(force=True)[0], axis=1),
                  "div": residuals["div"].numpy(force=True)[0]}
 
-    porous_ids = dataset[0]["cellToRegion"].flatten()
-
+    porous_ids = dataset[0]["cellToRegion"].flatten().numpy(force=True)
     grid = get_interpolation_grid(c, 50)
     grid_points = {"x": grid[0].flatten(), "y": grid[1].flatten()}
 
