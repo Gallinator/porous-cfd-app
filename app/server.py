@@ -185,7 +185,8 @@ async def predict(input_data: Predict2dInput):
 
         shutil.rmtree(session_dir)
 
-        partial_f = partial(postprocess, dataset, predicted, residuals)
+        # Detach predicted data as autograd computation graphs are not supported with multiprocessing
+        partial_f = partial(postprocess, dataset, predicted.detach(), residuals.detach())
         return await event_loop.run_in_executor(app.process_pool, partial_f)
     except:
         traceback.print_exc()
