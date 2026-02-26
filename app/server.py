@@ -5,6 +5,7 @@ import traceback
 from concurrent.futures import ProcessPoolExecutor
 from contextlib import asynccontextmanager
 from functools import partial
+from multiprocessing import get_context
 import numpy as np
 import torch
 from fastapi import FastAPI, HTTPException
@@ -150,7 +151,7 @@ async def lifespan(app: FastAPI):
 settings = AppSettings()
 app = FastAPI(lifespan=lifespan)
 openfoam_cmd = f'{settings.openfoam_dir}/etc/openfoam'
-app.process_pool = ProcessPoolExecutor()
+app.process_pool = ProcessPoolExecutor(mp_context=get_context("forkserver"))
 app.models = {}
 
 
